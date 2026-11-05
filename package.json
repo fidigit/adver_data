@@ -1,0 +1,12 @@
+{
+  "name": "adver-data",
+  "version": "0.0.1",
+  "private": true,
+  "description": "广告投诉分析报表服务",
+  "type": "module",
+  "engines": { "node": ">=22.12.0" },
+  "scripts": {
+    "start": "node --env-file-if-exists=.env server.mjs",
+    "test": "node --test"
+  }
+}

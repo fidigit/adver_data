@@ -1,0 +1,9 @@
+services:
+  app:
+    build: .
+    restart: unless-stopped
+    ports:
+      - "${APP_PORT:-18081}:18081"
+    read_only: true
+    security_opt:
+      - no-new-privileges:true

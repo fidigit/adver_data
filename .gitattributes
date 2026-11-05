@@ -1,0 +1,6 @@
+* text=auto
+*.mjs text eol=lf
+Dockerfile text eol=lf
+*.yaml text eol=lf
+# 保留原报表字节，避免不同平台自动转换换行。
+public/index.html -text -whitespace

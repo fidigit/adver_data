@@ -1,0 +1,12 @@
+.env
+.env.*
+!.env.example
+node_modules/
+logs/
+backups/
+*.log
+.DS_Store
+Thumbs.db
+/scripts/run-server.ps1
+# 保留本地原件；部署副本在 public/index.html。
+/投诉类型与来源_时间热力立方体_初版(2).html
