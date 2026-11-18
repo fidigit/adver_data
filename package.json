@@ -1,6 +1,6 @@
 {
   "name": "adver-data",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "private": true,
   "description": "广告投诉分析报表服务",
   "type": "module",

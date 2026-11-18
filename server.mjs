@@ -18,7 +18,7 @@ export function createServer() {
     const pathname = new URL(req.url, 'http://localhost').pathname;
     if (pathname === '/api/health') {
       res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
-      res.end(req.method === 'HEAD' ? undefined : JSON.stringify({ status: 'ok', version: '0.0.1' }));
+      res.end(req.method === 'HEAD' ? undefined : JSON.stringify({ status: 'ok', version: '0.0.2' }));
       return;
     }
     if (pathname !== '/' && pathname !== '/index.html') {
@@ -46,7 +46,7 @@ if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.ur
   }
   const server = createServer();
   server.on('error', error => { console.error(error.message); process.exitCode = 1; });
-  server.listen(port, host, () => console.log(`adver-data v0.0.1 listening on http://${host}:${port}`));
+  server.listen(port, host, () => console.log(`adver-data v0.0.2 listening on http://${host}:${port}`));
   for (const signal of ['SIGTERM', 'SIGINT']) {
     process.on(signal, () => { server.close(); server.closeIdleConnections(); });
   }

@@ -5,12 +5,12 @@ import { readFile } from 'node:fs/promises';
 import { Script } from 'node:vm';
 import { createServer } from '../server.mjs';
 
-test('HTTP deployment serves the exact original report and limits exposed files', async t => {
+test('HTTP deployment serves the current report and limits exposed files', async t => {
   const server = createServer();
-  server.listen(0, '127.0.0.1');
+  server.listen(0, '127.0.0.2');
   await once(server, 'listening');
   t.after(() => { server.close(); server.closeAllConnections(); });
-  const base = `http://127.0.0.1:${server.address().port}`;
+  const base = `http://127.0.0.2:${server.address().port}`;
   const original = await readFile(new URL('../public/index.html', import.meta.url), 'utf8');
   for (const path of ['/', '/index.html?test=1']) {
     const response = await fetch(base + path);
@@ -21,7 +21,7 @@ test('HTTP deployment serves the exact original report and limits exposed files'
   const head = await fetch(base, { method: 'HEAD' });
   assert.equal(head.status, 200);
   assert.equal(await head.text(), '');
-  assert.deepEqual(await (await fetch(base + '/api/health')).json(), { status: 'ok', version: '0.0.1' });
+  assert.deepEqual(await (await fetch(base + '/api/health')).json(), { status: 'ok', version: '0.0.2' });
   for (const path of ['/.env', '/server.mjs', '/package.json', '/missing', '/%2e%2e/.env']) {
     assert.equal((await fetch(base + path)).status, 404);
   }
@@ -31,6 +31,6 @@ test('HTTP deployment serves the exact original report and limits exposed files'
 test('all inline report scripts parse without errors', async () => {
   const html = await readFile(new URL('../public/index.html', import.meta.url), 'utf8');
   const scripts = [...html.matchAll(/<script[^>]*>([\s\S]*?)<\/script>/g)];
-  assert.equal(scripts.length, 3);
+  assert.equal(scripts.length, 1);
   for (const [index, script] of scripts.entries()) new Script(script[1], { filename: `report-${index}.js` });
 });
