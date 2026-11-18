@@ -3,6 +3,7 @@ import react from '@vitejs/plugin-react';
 
 export default defineConfig({
   plugins: [react()],
+  server: { proxy: { '/api': 'http://127.0.0.1:18081' } },
   build: {
     // 图表引擎独立缓存，应用代码和数据更新不必重新下载全部组件库。
     rolldownOptions: {

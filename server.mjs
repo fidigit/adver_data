@@ -1,10 +1,11 @@
 import http from 'node:http';
+import { getComplaintDistribution } from './complaint-distribution.mjs';
 import { readFile, access } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import { resolve, join, extname } from 'node:path';
 
 const defaultRoot = fileURLToPath(new URL('./dist/', import.meta.url));
-export const VERSION = '0.0.3';
+export const VERSION = '0.0.5';
 const types = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.css': 'text/css; charset=utf-8', '.woff2': 'font/woff2', '.svg': 'image/svg+xml' };
 
 export function createServer({ root = defaultRoot } = {}) {
@@ -23,6 +24,22 @@ export function createServer({ root = defaultRoot } = {}) {
     if (pathname === '/api/health') {
       res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
       res.end(req.method === 'HEAD' ? undefined : JSON.stringify({ status: 'ok', version: VERSION }));
+      return;
+    }
+    if (pathname === '/api/complaint-distribution') {
+      res.setHeader('Content-Type', 'application/json; charset=utf-8');
+      try {
+        const data = await getComplaintDistribution();
+        res.writeHead(200);
+        res.end(req.method === 'HEAD' ? undefined : JSON.stringify(data));
+      } catch (error) {
+        const missing = error.code === 'MYSQL_NOT_CONFIGURED';
+        if (!missing) console.error('Complaint distribution query failed:', error.code || 'UNKNOWN');
+        res.writeHead(503);
+        res.end(req.method === 'HEAD' ? undefined : JSON.stringify({
+          error: missing ? '尚未配置 MySQL 连接。' : '暂时无法读取 MySQL 投诉统计，请稍后重试。',
+        }));
+      }
       return;
     }
     const home = pathname === '/' || pathname === '/index.html';

@@ -48,7 +48,7 @@ test('actual Ant Design Charts engine renders the heatmap with all cells, labels
     const xml = svg.outerHTML;
     assert.match(xml, /Gromore/); assert.match(xml, /14.6%/); assert.match(xml, /样本少/);
     assert.doesNotMatch(xml, /NaN/); assert.match(xml, /100%/);
-    assert.ok(/rgba?\(240,\s*242,\s*245(?:,1)?\)|#f0f2f5/i.test(xml), 'small samples must use gray fill');
+    assert.ok(/rgba?\(242,\s*237,\s*228(?:,1)?\)|#f2ede4/i.test(xml), 'small samples must use gray fill');
     const marks = plot.chart.getContext().canvas.document.querySelectorAll('.element');
     assert.equal(marks.length, 64);
     await mkdir(new URL('../test-results/', import.meta.url), { recursive: true });
@@ -60,7 +60,7 @@ test('actual Ant Design Charts engine renders the heatmap with all cells, labels
       canvasPlot.execAdaptor(); canvasPlot.chart.options(canvasPlot.options); await canvasPlot.chart.render();
       const canvas = contexts.get(canvasHost.querySelector('canvas')).canvas;
       const output = createCanvas(1240, 640), context = output.getContext('2d');
-      context.fillStyle = '#ffffff'; context.fillRect(0, 0, 1240, 640); context.drawImage(canvas, 0, 0);
+      context.fillStyle = '#fffcf6'; context.fillRect(0, 0, 1240, 640); context.drawImage(canvas, 0, 0);
       await writeFile(new URL('../test-results/ant-design-heatmap.png', import.meta.url), output.toBuffer('image/png'));
     } finally { canvasPlot.destroy(); }
   } finally { plot.destroy(); dom.window.close(); }

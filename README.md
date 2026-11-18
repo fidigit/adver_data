@@ -45,3 +45,23 @@ npm start
 9项测试覆盖原始统计、单日/范围/反馈渠道、固定色阶、零值/小样本、标题本地存储、HTTP路径与生产资源、真实Ant Design弹窗/筛选，以及真实Heatmap引擎SVG和Canvas渲染（含64格、标签和图例）。图表渲染图片输出到被忽略的test-results目录。
 
 界面交互测试使用JSDOM，真实图表使用离屏渲染；浏览器工具启动失败，尚未完成浏览器中的鼠标悬停、移动端及视觉验收。本机没有Docker，容器构建和目标服务器网络仍需部署后验证。测试命令在所有断言完成后强制退出，以清理JSDOM和组件调度器剩余句柄。
+
+## v0.0.4 广告投诉分布
+
+在项目根目录打开 PowerShell。构建完成后运行以下命令，在终端隐藏输入密码，验证目标表与汇总查询，并启动本地报表。
+
+```powershell
+npm.cmd ci
+npm.cmd run build
+powershell -NoProfile -ExecutionPolicy Bypass -File ./scripts/mysql-login.ps1 -Start
+```
+
+本地默认地址为 http://127.0.0.1:18081。去掉 `-Start` 可只做连通性测试。
+
+连接默认使用 `hiido_report` 作为数据库名。如果这是客户端里的连接别名，请将 `MYSQL_DATABASE` 设为实际库名。查询按 `dt` 分组，统计总量及八类投诉的去重数量。空日期记录不会绘制，类别之间可能包含同一投诉。页面读取服务端聚合结果，查询结果缓存一分钟。
+
+服务器需能访问 MySQL。常驻运行时，在服务器的 `.env` 或服务进程环境中设置 `MYSQL_PASSWORD`，然后重启 Node 服务或执行 `docker compose up -d --build`。数据库连通性可用 `node --env-file-if-exists=.env scripts/check-mysql.mjs` 验证。
+
+## v0.0.5 报表设置
+
+浏览器标签固定显示「广告投诉分析报表」。两张报表都可独立改名，名称保存在当前浏览器。热力图默认显示前 8 个广告来源，小样本阈值默认为 10 条，页面可分别调整。广告投诉分布默认展示 MySQL 返回的全部日期，日期范围同时筛选折线和数据明细。

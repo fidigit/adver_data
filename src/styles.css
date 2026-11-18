@@ -1,25 +1,33 @@
-body{margin:0;background:#f4f6f9;color:#1c2e45}
+body{margin:0;background:#f6f0e6;color:#443225}
 .report-shell{max-width:1500px;margin:0 auto;padding:38px 28px}
-.report-panel{background:#fff;border:1px solid #e7ebf1;border-radius:12px;box-shadow:0 6px 24px #152e4e04;overflow:hidden}
+.report-panel{background:#fffcf6;border:1px solid #e8dcc9;border-radius:12px;box-shadow:0 6px 24px #152e4e04;overflow:hidden}
 .report-header{padding:30px 32px 26px;display:flex;justify-content:space-between;align-items:center;gap:24px}
-.report-eyebrow{display:flex;align-items:center;gap:8px;margin-bottom:12px;color:#738198;font-size:12px;letter-spacing:1px}
-.report-dot{width:7px;height:7px;border-radius:50%;background:#1677ff}
-.report-header h1.ant-typography{margin:0 0 8px;font-size:25px;line-height:1.4;overflow-wrap:anywhere;letter-spacing:-.4px}
+.report-eyebrow{display:flex;align-items:center;gap:8px;margin-bottom:12px;color:#746353;font-size:12px;letter-spacing:1px}
+.report-dot{width:7px;height:7px;border-radius:50%;background:#bc633a}
+.report-header h1.ant-typography{margin:0 0 8px;font-size:34px;line-height:1.4;overflow-wrap:anywhere;letter-spacing:-.4px}
 .report-header>.ant-btn{flex-shrink:0}
-.filter-bar{display:flex;flex-wrap:wrap;align-items:flex-end;gap:20px;padding:22px 32px;background:#fafbfd;border-block:1px solid #edf0f5}
+.filter-bar{display:flex;flex-wrap:wrap;align-items:flex-end;gap:20px;padding:22px 32px;background:#faf4ea;border-block:1px solid #eadfce}
 .filter-field{display:flex;flex-direction:column;gap:8px}
-.filter-field>label{font-size:12px;color:#6a778d}
+.filter-field>label{font-size:12px;color:#746353}
 .filter-field>.ant-select{min-width:210px}
 .report-context{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;padding:23px 32px 0}
-.report-context strong{font-variant-numeric:tabular-nums;font-weight:600;color:#314660}
+.report-context strong{font-variant-numeric:tabular-nums;font-weight:600;color:#443225}
 .sample-hint{font-size:12px}
 .heatmap-scroll{overflow-x:auto;padding:0 12px}
-.heatmap-stage{width:100%}
+.heatmap-stage{width:100%;position:relative}.matrix-corner{position:absolute;top:23px;left:20px;font-size:15px;color:#746353;pointer-events:none}
 .chart-footer{display:flex;justify-content:space-between;gap:14px;align-items:center;padding:0 32px 24px}
 .chart-footer>.ant-typography{font-size:12px}
 .chart-footer>.ant-btn{flex-shrink:0;padding-right:0}
 .accessible-data{padding:0 32px 28px;overflow:auto}
 .accessible-data table{min-width:680px;width:100%;border-collapse:collapse;font-size:13px}
-.accessible-data th,.accessible-data td{padding:10px;border-bottom:1px solid #edf0f5;text-align:left}
-.accessible-data thead{background:#fafbfd}.accessible-data caption{text-align:left;padding:12px 0;font-weight:500}
+.accessible-data th,.accessible-data td{padding:10px;border-bottom:1px solid #eadfce;text-align:left}
+.accessible-data thead{background:#faf4ea}.accessible-data caption{text-align:left;padding:12px 0;font-weight:500}
 @media(max-width:700px){.report-shell{padding:14px 8px}.report-header{padding:22px 18px;align-items:flex-start;flex-wrap:wrap}.report-header h1.ant-typography{font-size:21px}.filter-bar{padding:18px;gap:16px;width:100%}.filter-field{width:100%;min-width:0}.filter-field>.ant-picker{width:100%}.filter-field>.ant-select{min-width:0;width:100%}.report-context{padding:20px 18px 0}.chart-footer{padding:0 18px 18px;align-items:flex-start;flex-direction:column;gap:4px}.heatmap-scroll{padding:0}.accessible-data{padding:0 18px 20px}}
+
+.distribution-panel{margin-top:24px;padding:26px 32px}.distribution-loading{min-height:120px}
+@media(max-width:700px){.distribution-panel{padding:18px}}
+
+.distribution-header,.distribution-controls{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.distribution-header h2.ant-typography{margin:0;font-size:34px;line-height:1.4;overflow-wrap:anywhere}
+.distribution-controls{margin:18px 0;align-items:flex-end}.distribution-data{padding:0}.distribution-data table{min-width:980px}
+@media(max-width:700px){.distribution-header h2.ant-typography{font-size:21px}}

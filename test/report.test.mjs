@@ -32,11 +32,11 @@ test('Heatmap fixes scale and distinguishes small samples from zero', () => {
   const report = aggregateReport(data, { start: range.start, end: range.start });
   const config = heatmapConfig(report);
   assert.equal(config.mark, 'cell'); assert.equal(config.colorField, 'rate');
-  assert.deepEqual(config.scale.color.domain, [0, 1]);
-  assert.equal(config.style.fill({ status: 'empty' }), '#ffffff');
-  assert.equal(config.style.fill({ status: 'low' }), '#f0f2f5');
-  assert.notEqual(config.style.fill({ status: 'normal', rate: 0 }), '#ffffff');
-  assert.notEqual(config.style.fill({ status: 'normal', rate: 0 }), '#f0f2f5');
+  assert.deepEqual(config.scale.color.domain, [0, 1/3, 2/3, 1]);
+  assert.equal(config.style.fill({ status: 'empty' }), '#fffcf6');
+  assert.equal(config.style.fill({ status: 'low' }), '#f2ede4');
+  assert.notEqual(config.style.fill({ status: 'normal', rate: 0 }), '#fffcf6');
+  assert.notEqual(config.style.fill({ status: 'normal', rate: 0 }), '#f2ede4');
   assert.match(report.cells.find(cell => cell.status === 'low').label, /样本少/);
 });
 
@@ -48,4 +48,13 @@ test('title validation and storage preserve existing v0.0.2 preferences', () => 
   assert.equal(saveTitle(storage, '<测试>'), true); assert.equal(loadTitle(storage), '<测试>');
   const blocked = { getItem() { throw Error(); }, setItem() { throw Error(); } };
   assert.equal(loadTitle(blocked), DEFAULT_TITLE); assert.equal(saveTitle(blocked, '名称'), false);
+});
+
+test('custom top N and sample threshold apply independently of source scope', () => {
+  const limited = aggregateReport(data, { ...range, topN: 3, minSample: 49 });
+  assert.equal(limited.sources.length, 3);
+  assert.equal(limited.cells.find(cell => cell.scene === '广告不满但原因不明' && cell.source === 'Gromore').status, 'low');
+  const all = aggregateReport(data, { ...range, scope: '全部', topN: 3, minSample: 1 });
+  assert.ok(all.sources.length > 3);
+  assert.ok(all.cells.every(cell => cell.status !== 'low'));
 });

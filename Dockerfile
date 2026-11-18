@@ -4,12 +4,15 @@ COPY package.json package-lock.json ./
 RUN npm ci --no-audit --no-fund
 COPY index.html vite.config.mjs ./
 COPY src ./src
+COPY public ./public
 RUN npm run build
 
 FROM node:24-alpine
 WORKDIR /app
 ENV NODE_ENV=production HOST=0.0.0.0 PORT=18081
-COPY --chown=node:node package.json server.mjs ./
+COPY package.json package-lock.json ./
+RUN npm ci --omit=dev --no-audit --no-fund
+COPY --chown=node:node server.mjs complaint-distribution.mjs ./
 COPY --from=frontend --chown=node:node /build/dist ./dist
 USER node
 EXPOSE 18081

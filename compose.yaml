@@ -4,6 +4,9 @@ services:
     restart: unless-stopped
     ports:
       - "${APP_PORT:-18081}:18081"
+    environment:
+      MYSQL_PASSWORD: "${MYSQL_PASSWORD:-}"
+      MYSQL_DATABASE: "${MYSQL_DATABASE:-hiido_report}"
     read_only: true
     security_opt:
       - no-new-privileges:true
