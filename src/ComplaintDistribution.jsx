@@ -1,11 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import { Line } from '@ant-design/plots';
-import { Alert, Button, DatePicker, Empty, Spin, Typography } from 'antd';
+import { Alert, Button, DatePicker, Segmented, Empty, Spin, Typography } from 'antd';
 
 import dayjs from 'dayjs';
 import { reportFont } from './heatmap-config.mjs';
 
 export function ComplaintDistribution({ title, onRename }) {
+  const [mode, setMode] = useState('range');
+  const [date, setDate] = useState(null);
   const [range, setRange] = useState(null);
   const [details, setDetails] = useState(false);
   const [attempt, setAttempt] = useState(0);
@@ -39,42 +41,54 @@ export function ComplaintDistribution({ title, onRename }) {
   const rows = result?.rows;
   const first = rows?.[0]?.date.slice(0, 10);
   const last = rows?.at(-1)?.date.slice(0, 10);
-  const shown = range ? rows?.filter(({ date }) => {
-    const day = date.slice(0, 10);
-    return day >= range[0].format('YYYY-MM-DD') && day <= range[1].format('YYYY-MM-DD');
+  const activeRange = mode === 'day' && first ? [date ?? dayjs(first), date ?? dayjs(first)] : range;
+  const shown = activeRange ? rows?.filter(({ date: value }) => {
+    const day = value.slice(0, 10);
+    return day >= activeRange[0].format('YYYY-MM-DD') && day <= activeRange[1].format('YYYY-MM-DD');
   }) : rows;
+  const disabledDate = value => value.format('YYYY-MM-DD') < first || value.format('YYYY-MM-DD') > last;
   const points = shown?.flatMap(({ date, counts }) =>
     counts.map((count, index) => ({ date, count, series: result.series[index] }))
   );
   return <section className="report-panel distribution-panel" aria-labelledby="distribution-title">
-    <header className="distribution-header">
+    <header className="report-header">
       <Typography.Title level={2} id="distribution-title">{title}</Typography.Title>
       <Button onClick={onRename} aria-label="修改广告投诉分布名称">修改名称</Button>
     </header>
-    {first && <div className="distribution-controls">
+    {first && <div className="filter-bar">
       <div className="filter-field">
-        <label htmlFor="distribution-start">统计日期（dt）</label>
-        <DatePicker.RangePicker id={{ start: 'distribution-start', end: 'distribution-end' }}
-          value={range ?? [dayjs(first), dayjs(last)]} onChange={setRange}
-          disabledDate={date => date.format('YYYY-MM-DD') < first || date.format('YYYY-MM-DD') > last} />
+        <label>统计时间</label>
+        <Segmented aria-label="广告投诉分布统计时间" options={[{ label: '日期范围', value: 'range' }, { label: '某一日', value: 'day' }]}
+          value={mode} onChange={setMode} />
       </div>
+      <div className="filter-field">
+        <label htmlFor={mode === 'day' ? 'distribution-date' : 'distribution-start'}>{mode === 'day' ? '统计日期' : '开始与结束日期'}</label>
+        {mode === 'day'
+          ? <DatePicker id="distribution-date" value={date ?? dayjs(first)} onChange={setDate} disabledDate={disabledDate} allowClear={false} />
+          : <DatePicker.RangePicker id={{ start: 'distribution-start', end: 'distribution-end' }}
+            value={range ?? [dayjs(first), dayjs(last)]} onChange={setRange} disabledDate={disabledDate} allowClear={false} />}
+      </div>
+    </div>}
+    <div className="distribution-chart">
+      {!result && <Spin description="正在读取投诉统计"><div className="distribution-loading" /></Spin>}
+      {result?.error && <Alert type="warning" showIcon title={result.error}
+        action={<Button onClick={() => { setResult(null); setAttempt(value => value + 1); }}>重试</Button>} />}
+      {points?.length === 0 && <Empty description="暂无投诉统计" />}
+      {points?.length > 0 && <Line data={points} xField="date" yField="count" colorField="series"
+        height={420} point={{ size: 2 }} animate={false}
+        axis={{ x: { title: '日期', labelFontFamily: reportFont, titleFontFamily: reportFont }, y: { title: '投诉数', labelFontFamily: reportFont, titleFontFamily: reportFont, labelFormatter: '~s' } }}
+        legend={{ color: { position: 'bottom', itemLabelFontFamily: reportFont } }}
+        scale={{ y: { domainMin: 0 }, color: { domain: result.series, range: [
+          '#703126', '#bc5c24', '#197973', '#4969ad', '#7e549e', '#8c7220', '#b64765', '#416c38', '#5e6b7d',
+        ] } }}
+        tooltip={{ title: 'date', items: [{ field: 'count', name: '投诉数' }] }}
+        interaction={{ tooltip: { shared: true } }} />}
+    </div>
+    {first && <footer className="chart-footer distribution-footer">
       <Button type="link" aria-expanded={details} onClick={() => setDetails(value => !value)}>
         {details ? '收起数据明细' : '查看数据明细'}
       </Button>
-    </div>}
-    {!result && <Spin description="正在读取投诉统计"><div className="distribution-loading" /></Spin>}
-    {result?.error && <Alert type="warning" showIcon title={result.error}
-      action={<Button onClick={() => { setResult(null); setAttempt(value => value + 1); }}>重试</Button>} />}
-    {points?.length === 0 && <Empty description="暂无投诉统计" />}
-    {points?.length > 0 && <Line data={points} xField="date" yField="count" colorField="series"
-      height={420} point={{ size: 2 }} animate={false}
-      axis={{ x: { title: '日期', labelFontFamily: reportFont, titleFontFamily: reportFont }, y: { title: '投诉数', labelFontFamily: reportFont, titleFontFamily: reportFont, labelFormatter: '~s' } }}
-      legend={{ color: { position: 'bottom', itemLabelFontFamily: reportFont } }}
-      scale={{ y: { domainMin: 0 }, color: { domain: result.series, range: [
-        '#703126', '#bc5c24', '#197973', '#4969ad', '#7e549e', '#8c7220', '#b64765', '#416c38', '#5e6b7d',
-      ] } }}
-      tooltip={{ title: 'date', items: [{ field: 'count', name: '投诉数' }] }}
-      interaction={{ tooltip: { shared: true } }} />}
+    </footer>}
     {details && shown?.length > 0 && <div className="accessible-data distribution-data">
       <table>
         <caption>{title} · 数据明细</caption>

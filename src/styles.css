@@ -24,10 +24,13 @@ body{margin:0;background:#f6f0e6;color:#443225}
 .accessible-data thead{background:#faf4ea}.accessible-data caption{text-align:left;padding:12px 0;font-weight:500}
 @media(max-width:700px){.report-shell{padding:14px 8px}.report-header{padding:22px 18px;align-items:flex-start;flex-wrap:wrap}.report-header h1.ant-typography{font-size:21px}.filter-bar{padding:18px;gap:16px;width:100%}.filter-field{width:100%;min-width:0}.filter-field>.ant-picker{width:100%}.filter-field>.ant-select{min-width:0;width:100%}.report-context{padding:20px 18px 0}.chart-footer{padding:0 18px 18px;align-items:flex-start;flex-direction:column;gap:4px}.heatmap-scroll{padding:0}.accessible-data{padding:0 18px 20px}}
 
-.distribution-panel{margin-top:24px;padding:26px 32px}.distribution-loading{min-height:120px}
-@media(max-width:700px){.distribution-panel{padding:18px}}
-
-.distribution-header,.distribution-controls{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
-.distribution-header h2.ant-typography{margin:0;font-size:34px;line-height:1.4;overflow-wrap:anywhere}
-.distribution-controls{margin:18px 0;align-items:flex-end}.distribution-data{padding:0}.distribution-data table{min-width:980px}
-@media(max-width:700px){.distribution-header h2.ant-typography{font-size:21px}}
+.distribution-panel{margin-top:24px}
+.distribution-loading{min-height:120px}
+.distribution-panel .report-header h2.ant-typography{margin:0;font-size:34px;line-height:1.4;overflow-wrap:anywhere;letter-spacing:-.4px}
+.distribution-chart{padding:22px 32px}
+.distribution-footer>.ant-btn{margin-left:auto}
+.distribution-data table{min-width:980px}
+@media(max-width:700px){
+  .distribution-panel .report-header h2.ant-typography{font-size:21px}
+  .distribution-chart{padding:18px}
+}

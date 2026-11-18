@@ -5,7 +5,7 @@ import { fileURLToPath } from 'node:url';
 import { resolve, join, extname } from 'node:path';
 
 const defaultRoot = fileURLToPath(new URL('./dist/', import.meta.url));
-export const VERSION = '0.0.5';
+export const VERSION = '0.0.6';
 const types = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.css': 'text/css; charset=utf-8', '.woff2': 'font/woff2', '.svg': 'image/svg+xml' };
 
 export function createServer({ root = defaultRoot } = {}) {
