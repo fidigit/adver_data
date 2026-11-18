@@ -1,11 +1,13 @@
 import http from 'node:http';
-import { readFile } from 'node:fs/promises';
+import { readFile, access } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
-import { resolve } from 'node:path';
+import { resolve, join, extname } from 'node:path';
 
-const reportPath = new URL('./public/index.html', import.meta.url);
+const defaultRoot = fileURLToPath(new URL('./dist/', import.meta.url));
+export const VERSION = '0.0.3';
+const types = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.css': 'text/css; charset=utf-8', '.woff2': 'font/woff2', '.svg': 'image/svg+xml' };
 
-export function createServer() {
+export function createServer({ root = defaultRoot } = {}) {
   return http.createServer(async (req, res) => {
     res.setHeader('X-Content-Type-Options', 'nosniff');
     res.setHeader('Referrer-Policy', 'no-referrer');
@@ -15,30 +17,38 @@ export function createServer() {
       res.end();
       return;
     }
-    const pathname = new URL(req.url, 'http://localhost').pathname;
+    let pathname;
+    try { pathname = new URL(req.url, 'http://localhost').pathname; }
+    catch { res.writeHead(400); res.end(); return; }
     if (pathname === '/api/health') {
       res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
-      res.end(req.method === 'HEAD' ? undefined : JSON.stringify({ status: 'ok', version: '0.0.2' }));
+      res.end(req.method === 'HEAD' ? undefined : JSON.stringify({ status: 'ok', version: VERSION }));
       return;
     }
-    if (pathname !== '/' && pathname !== '/index.html') {
+    const home = pathname === '/' || pathname === '/index.html';
+    const asset = /^\/assets\/[A-Za-z0-9_-]+\.(?:js|css|woff2|svg)$/.test(pathname);
+    if (!home && !asset) {
       res.writeHead(404, { 'Content-Type': 'text/plain; charset=utf-8' });
       res.end(req.method === 'HEAD' ? undefined : 'Not Found');
       return;
     }
     try {
-      const html = await readFile(reportPath);
-      res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8', 'Content-Length': html.length });
-      res.end(req.method === 'HEAD' ? undefined : html);
+      const file = join(root, home ? 'index.html' : pathname.slice(1));
+      const content = await readFile(file);
+      if (asset) res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
+      res.writeHead(200, { 'Content-Type': types[extname(file)], 'Content-Length': content.length });
+      res.end(req.method === 'HEAD' ? undefined : content);
     } catch (error) {
-      console.error('Unable to read report:', error.message);
-      res.writeHead(500, { 'Content-Type': 'text/plain; charset=utf-8' });
-      res.end(req.method === 'HEAD' ? undefined : 'Report unavailable');
+      const status = error.code === 'ENOENT' ? (home ? 503 : 404) : 500;
+      if (status !== 404) console.error('Unable to read built frontend:', error.message);
+      res.writeHead(status, { 'Content-Type': 'text/plain; charset=utf-8' });
+      res.end(req.method === 'HEAD' ? undefined : home ? 'Frontend unavailable. Run npm ci and npm run build.' : 'Not Found');
     }
   });
 }
 
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
+  await access(join(defaultRoot, 'index.html')).catch(() => { throw new Error('Frontend not built. Run npm ci and npm run build before starting.'); });
   const host = process.env.HOST || '0.0.0.0';
   const port = Number(process.env.PORT || 18081);
   if (!Number.isInteger(port) || port < 1 || port > 65535) {
@@ -46,7 +56,7 @@ if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.ur
   }
   const server = createServer();
   server.on('error', error => { console.error(error.message); process.exitCode = 1; });
-  server.listen(port, host, () => console.log(`adver-data v0.0.2 listening on http://${host}:${port}`));
+  server.listen(port, host, () => console.log(`adver-data v${VERSION} listening on http://${host}:${port}`));
   for (const signal of ['SIGTERM', 'SIGINT']) {
     process.on(signal, () => { server.close(); server.closeIdleConnections(); });
   }
