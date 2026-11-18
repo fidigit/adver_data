@@ -34,3 +34,10 @@ body{margin:0;background:#f6f0e6;color:#443225}
   .distribution-panel .report-header h2.ant-typography{font-size:21px}
   .distribution-chart{padding:18px}
 }
+
+.distribution-trends{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;padding:20px 32px 0}
+.distribution-trend{display:flex;flex-direction:column;gap:5px;padding:14px 16px;border:1px solid #eadfce;border-radius:10px;background:#fffaf2}
+.distribution-trend strong{font-size:25px;font-variant-numeric:tabular-nums}
+.distribution-trend .trend-up{color:#a33831}
+.distribution-trend .trend-down{color:#28664f}
+@media(max-width:700px){.distribution-trends{grid-template-columns:1fr;padding:16px 18px 0}}

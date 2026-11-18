@@ -1,11 +1,11 @@
 import http from 'node:http';
-import { getComplaintDistribution } from './complaint-distribution.mjs';
+import { getComplaintDistribution, getComplaintHeatmap } from './complaint-distribution.mjs';
 import { readFile, access } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import { resolve, join, extname } from 'node:path';
 
 const defaultRoot = fileURLToPath(new URL('./dist/', import.meta.url));
-export const VERSION = '0.0.6';
+export const VERSION = '0.0.7';
 const types = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.css': 'text/css; charset=utf-8', '.woff2': 'font/woff2', '.svg': 'image/svg+xml' };
 
 export function createServer({ root = defaultRoot } = {}) {
@@ -18,9 +18,10 @@ export function createServer({ root = defaultRoot } = {}) {
       res.end();
       return;
     }
-    let pathname;
-    try { pathname = new URL(req.url, 'http://localhost').pathname; }
+    let url;
+    try { url = new URL(req.url, 'http://localhost'); }
     catch { res.writeHead(400); res.end(); return; }
+    const { pathname } = url;
     if (pathname === '/api/health') {
       res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
       res.end(req.method === 'HEAD' ? undefined : JSON.stringify({ status: 'ok', version: VERSION }));
@@ -29,7 +30,7 @@ export function createServer({ root = defaultRoot } = {}) {
     if (pathname === '/api/complaint-distribution') {
       res.setHeader('Content-Type', 'application/json; charset=utf-8');
       try {
-        const data = await getComplaintDistribution();
+        const data = await (url.searchParams.get('view') === 'heatmap' ? getComplaintHeatmap() : getComplaintDistribution());
         res.writeHead(200);
         res.end(req.method === 'HEAD' ? undefined : JSON.stringify(data));
       } catch (error) {

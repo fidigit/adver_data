@@ -6,7 +6,7 @@ v0.0.3将现有单模块报表改造为React + Ant Design + Ant Design Charts真
 
 ## 当前功能
 
-- 横轴为来源，纵轴为投诉类型；蓝色色阶固定0–100%，日期筛选后不改变比例范围。
+- 横轴为来源，纵轴为投诉类型；琥珀色色阶固定0–100%，日期筛选后不改变比例范围。
 - 格内显示激烈情绪占比和“激烈 / 投诉条数”；少于10条为灰色小样本，无记录为白色；真实零占比是浅蓝色。
 - 原生图表Tooltip显示类型、来源、投诉条数、激烈条数及样本提示；来源顺序按全期投诉量固定。
 - Ant Design的Segmented、RangePicker/DatePicker、Select提供日期范围/单日及来源筛选；范围限制在已有样本日期。
@@ -24,7 +24,7 @@ npm test
 npm start
 ```
 
-访问 `http://127.0.0.1:18081`，健康接口 `/api/health` 返回版本0.0.3。也可用 `node --env-file-if-exists=.env server.mjs` 启动。缺少dist构建时服务明确报错，不能继续用旧版本的“只克隆并启动”流程。
+访问 `http://127.0.0.1:18081`，健康接口 `/api/health` 返回版本0.0.7。也可用 `node --env-file-if-exists=.env server.mjs` 启动。缺少dist构建时服务明确报错，不能继续用旧版本的“只克隆并启动”流程。
 
 开发热更新运行 `npm run dev`，以Vite输出的本机地址为准。生产Node服务只依赖内置模块，提供构建后的dist；浏览器无需访问外部CDN。依赖版本由package-lock.json锁定。
 
@@ -34,7 +34,7 @@ npm start
 
 ## 数据与配置
 
-`src/data/report.json`保持原505行汇总记录：2026-10-21至2026-10-27全部2,899条投诉、869条激烈投诉；默认前8广告来源1,142条。统计为先累计条数再计算占比，不平均每日百分比。不自动拉取实时数据；外部Dashboard、数据库及账号系统尚未接入。
+两张报表均从 MySQL 读取数据。热力图按日期、广告场景和广告来源统计投诉记录，激烈投诉为「特别反感」或「无法忍受」，跨日按累计条数计算占比。静态 JSON 保留为回归测试样本。
 
 数据打包在前端资源内，访问者可读取全部汇总数据。标题仅保存在浏览器。原中文HTML作为本地历史原件保留且被Git忽略；v0.0.3移除public/index.html，当前入口为index.html与src/main.jsx。
 
@@ -65,3 +65,7 @@ powershell -NoProfile -ExecutionPolicy Bypass -File ./scripts/mysql-login.ps1 -S
 ## v0.0.5 报表设置
 
 浏览器标签固定显示「广告投诉分析报表」。两张报表都可独立改名，名称保存在当前浏览器。热力图默认显示前 8 个广告来源，小样本阈值默认为 10 条，页面可分别调整。广告投诉分布默认展示 MySQL 返回的全部日期，日期范围同时筛选折线和数据明细。
+
+## v0.0.7 部署验证
+
+服务器需能访问 MySQL，并在本机 .env 或服务环境中配置 MYSQL_PASSWORD。升级后检查 /api/health 返回 0.0.7，再分别访问 /api/complaint-distribution 和 /api/complaint-distribution?view=heatmap 验证两张报表的数据库查询。

@@ -63,3 +63,37 @@ export function getComplaintDistribution() {
   }).finally(() => { pending = undefined; });
   return pending;
 }
+
+const heatmapSql = `
+SELECT DATE_FORMAT(DATE(dt), '%Y-%m-%d') AS date,
+       content_scene AS scene, TRIM(adver_source) AS source,
+       '广告来源' AS \`group\`,
+       COUNT(*) AS n,
+       SUM(CASE WHEN TRIM(sentiment_level) IN ('特别反感', '无法忍受') THEN 1 ELSE 0 END) AS h
+FROM ${table}
+WHERE dt IS NOT NULL
+  AND content_scene IS NOT NULL AND TRIM(content_scene) <> ''
+  AND adver_source IS NOT NULL AND TRIM(adver_source) <> ''
+GROUP BY DATE(dt), content_scene, TRIM(adver_source)
+ORDER BY DATE(dt), content_scene, TRIM(adver_source)`;
+
+let heatmapPending;
+let heatmapCache;
+let heatmapExpires = 0;
+
+export function getComplaintHeatmap() {
+  if (Date.now() < heatmapExpires) return Promise.resolve(heatmapCache);
+  heatmapPending ??= read(heatmapSql).then(result => {
+    const rows = result.map(row => ({ ...row, n: Number(row.n), h: Number(row.h) }));
+    heatmapCache = {
+      rows,
+      dates: [...new Set(rows.map(row => row.date))],
+      scenes: [...new Set(rows.map(row => row.scene))],
+      total: rows.reduce((sum, row) => sum + row.n, 0),
+      high: rows.reduce((sum, row) => sum + row.h, 0),
+    };
+    heatmapExpires = Date.now() + 60000;
+    return heatmapCache;
+  }).finally(() => { heatmapPending = undefined; });
+  return heatmapPending;
+}

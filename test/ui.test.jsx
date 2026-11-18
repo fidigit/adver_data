@@ -1,3 +1,4 @@
+import { readFileSync } from 'node:fs';
 import { test, after } from 'node:test';
 import assert from 'node:assert/strict';
 import { JSDOM } from 'jsdom';
@@ -18,7 +19,8 @@ const { App, ConfigProvider } = await import('antd');
 const { Report } = await import('../src/App.jsx');
 after(() => { cleanup(); dom.window.close(); });
 function ChartStub({ data }) { return <div data-testid="chart" data-cells={data.length} />; }
-const mount = () => render(<ConfigProvider theme={{ token: { motion: false } }}><App><Report HeatmapComponent={ChartStub} /></App></ConfigProvider>);
+const data = JSON.parse(readFileSync(new URL('../src/data/report.json', import.meta.url), 'utf8'));
+const mount = () => render(<ConfigProvider theme={{ token: { motion: false } }}><App><Report data={data} HeatmapComponent={ChartStub} /></App></ConfigProvider>);
 
 test('Ant Design Modal confirms titles and preserves draft isolation, cancel, Escape and reload', async () => {
   localStorage.clear(); mount();

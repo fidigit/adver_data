@@ -3,6 +3,7 @@ import { Line } from '@ant-design/plots';
 import { Alert, Button, DatePicker, Segmented, Empty, Spin, Typography } from 'antd';
 
 import dayjs from 'dayjs';
+import { complaintTrends } from './complaint-trends.mjs';
 import { reportFont } from './heatmap-config.mjs';
 
 export function ComplaintDistribution({ title, onRename }) {
@@ -47,6 +48,7 @@ export function ComplaintDistribution({ title, onRename }) {
     return day >= activeRange[0].format('YYYY-MM-DD') && day <= activeRange[1].format('YYYY-MM-DD');
   }) : rows;
   const disabledDate = value => value.format('YYYY-MM-DD') < first || value.format('YYYY-MM-DD') > last;
+  const trends = last ? complaintTrends(rows, activeRange?.[1] ?? new Intl.DateTimeFormat('sv-SE', { timeZone: 'Asia/Shanghai' }).format(new Date())) : [];
   const points = shown?.flatMap(({ date, counts }) =>
     counts.map((count, index) => ({ date, count, series: result.series[index] }))
   );
@@ -69,17 +71,30 @@ export function ComplaintDistribution({ title, onRename }) {
             value={range ?? [dayjs(first), dayjs(last)]} onChange={setRange} disabledDate={disabledDate} allowClear={false} />}
       </div>
     </div>}
+    {trends.length > 0 && <div className="distribution-trends" aria-label="总投诉数同比">
+      {trends.map(({ label, current, previous, period, priorPeriod, change }) => <div className="distribution-trend" key={label}>
+        <Typography.Text>{label}</Typography.Text>
+        <strong className={change > 0 ? 'trend-up' : change < 0 ? 'trend-down' : undefined}>
+          {change === null ? '—' : new Intl.NumberFormat('zh-CN', { style: 'percent', signDisplay: 'exceptZero', maximumFractionDigits: 1 }).format(change)}
+        </strong>
+        <Typography.Text type="secondary">{period[0] === period[1] ? period[0] : period.join(' 至 ')}</Typography.Text>
+        <Typography.Text type="secondary">
+          {current === null || previous === null ? '本期或上期缺少日期数据' : previous === 0 ? '上期为 0 条，无法计算' : current + ' 条 / 上期 ' + previous + ' 条'}
+        </Typography.Text>
+        <Typography.Text type="secondary">上期 {priorPeriod[0] === priorPeriod[1] ? priorPeriod[0] : priorPeriod.join(' 至 ')}</Typography.Text>
+      </div>)}
+    </div>}
     <div className="distribution-chart">
       {!result && <Spin description="正在读取投诉统计"><div className="distribution-loading" /></Spin>}
       {result?.error && <Alert type="warning" showIcon title={result.error}
         action={<Button onClick={() => { setResult(null); setAttempt(value => value + 1); }}>重试</Button>} />}
       {points?.length === 0 && <Empty description="暂无投诉统计" />}
       {points?.length > 0 && <Line data={points} xField="date" yField="count" colorField="series"
-        height={420} point={{ size: 2 }} animate={false}
+        height={420} style={{ lineWidth: datum => (Array.isArray(datum) ? datum[0] : datum)?.series === result.series[0] ? 3.5 : 2.3 }} point={{ size: 2 }} animate={false}
         axis={{ x: { title: '日期', labelFontFamily: reportFont, titleFontFamily: reportFont }, y: { title: '投诉数', labelFontFamily: reportFont, titleFontFamily: reportFont, labelFormatter: '~s' } }}
         legend={{ color: { position: 'bottom', itemLabelFontFamily: reportFont } }}
         scale={{ y: { domainMin: 0 }, color: { domain: result.series, range: [
-          '#703126', '#bc5c24', '#197973', '#4969ad', '#7e549e', '#8c7220', '#b64765', '#416c38', '#5e6b7d',
+          '#2c2830', '#bf581c', '#007b73', '#405ab8', '#77469f', '#897100', '#b63964', '#457335', '#536376',
         ] } }}
         tooltip={{ title: 'date', items: [{ field: 'count', name: '投诉数' }] }}
         interaction={{ tooltip: { shared: true } }} />}
